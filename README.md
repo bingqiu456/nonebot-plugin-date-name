@@ -3,7 +3,7 @@
 </p>
 <div align="center">
 
-# NoneBot-Plugin-Date-name
+# NoneBot-Plugin-Date-Name
 _✨ 一个可以群昵称显示现在时间的插件 ✨_
     <br></br>
 </div>
