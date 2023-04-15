@@ -2,11 +2,11 @@ from nonebot import on_command
 from nonebot.adapters.onebot.v11 import GroupMessageEvent
 from nonebot.params import ArgPlainText
 from collections import Counter
-import sqlite3
+import sqlite3,os
 
 hashmap =  []# 预处理
 
-conn_name = sqlite3.connect("data/name.db")
+conn_name = sqlite3.connect(os.path.dirname(__file__)+"/name.db")
 d = conn_name.cursor().execute("SELECT * from `name`").fetchmany()
 for i in d:
     hashmap.append([i[0],i[1],i[2]])
