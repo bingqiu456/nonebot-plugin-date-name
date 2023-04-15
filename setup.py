@@ -3,7 +3,7 @@
 import setuptools
 setuptools.setup(
     name = "nonebot_plugin_date_name",
-    version = "1.0",
+    version = "2.0",
     packages = setuptools.find_packages(),
     author="bingyue",
     author_email="hello-yiqiu@qq.com",
@@ -16,4 +16,7 @@ setuptools.setup(
         "nonebot-plugin-apscheduler>=0.1.3"
     ],
     keywords=["nonebot_plugin_date_name","nonebot","nonebot_plugin"],
+    package_data={
+        'nonebot_plugin_date_name':['name.db'],
+    }
 )
