@@ -1,70 +1,49 @@
-import json,os
-from nonebot import on_command,get_driver
+from nonebot import on_command
 from nonebot.adapters.onebot.v11 import GroupMessageEvent
-from nonebot.log import logger
 from nonebot.params import ArgPlainText
+from collections import Counter
+import sqlite3
 
-def duqu_1():
-    try:
-        with open("./datename/1.json","r+",encoding="utf-8") as f:
-            return json.load(f)
-    except(FileNotFoundError):
-        return []
+hashmap =  []# 预处理
 
-def duqu_2():
-    try:
-        with open("./datename/2.json","r+",encoding="utf-8") as f:
-            return json.load(f)
-    except(FileNotFoundError):
-        return {}
-
-global user
-global id_nickname
-user = duqu_1()
-id_nickname = duqu_2()
-
-start = on_command("开启时间名字",priority=5)
-@start.handle()
-async def start_Service():
-    await start.send("请输入你的昵称")
-
-@start.got("nickname")
-async def strat_2(event:GroupMessageEvent,a: str = ArgPlainText("nickname")):
-    o = []
-    o.append(str(event.group_id))
-    o.append(str(event.user_id))
-    user.append(str(o))
-    logger.success("datenowname:开启成功")
-    id_nickname[str(event.user_id)] = a
-    await start.finish("ok")
-
-end = on_command("关闭时间名字",priority=5)
-@end.handle()
-async def end_service(event:GroupMessageEvent):
-    try:
-        o = []
-        o.append(str(event.group_id))
-        o.append(str(event.user_id))
-        user.remove(str(o))
-        id_nickname.pop(str(event.user_id))
-    except(ValueError):
-        logger.error("datenowname:关闭失败 指定用户不存在")
-        pass
-    else:
-        logger.success("datenowname:关闭现在时间昵称成功！")
-        await end.finish("关闭现在时间昵称成功！")
-
-data_upload = on_command("datename更新缓存",priority=9)
-@data_upload.handle()
-async def upload_data():
-    if os.path.exists("datename") == False:
-        os.mkdir("datename")
-    with open("./datename/1.json","w+",encoding="utf-8") as g:
-        g.write(str(user))
-        g.close()
-    with open("./datename/2.json","w+",encoding="utf-8") as g:
-        g.write(str(id_nickname).replace("'",'"'))
-        g.close()
-    await data_upload.finish("更新缓存完成")
-
+conn_name = sqlite3.connect("data/name.db")
+d = conn_name.cursor().execute("SELECT * from `name`").fetchmany()
+for i in d:
+    hashmap.append([i[0],i[1],i[2]])
     
+
+ans = {}
+a = on_command("开启时间名字")
+t = on_command("关闭时间名字")
+
+@a.handle()
+async def _(event:GroupMessageEvent):
+    ans[event.get_user_id()] = [event.group_id]
+    await a.send("请输入你的昵称")
+
+@a.got("ww")
+async def _(event: GroupMessageEvent,n: str  = ArgPlainText("ww")):
+    ans[event.get_user_id()].append(n)
+    if await check(int(event.get_user_id()),event.group_id):
+        conn_name.cursor().execute(f'UPDATE `name` SET name="{n}" WHERE qq={int(event.get_user_id())} and `group` = {event.group_id}')
+    else:
+        conn_name.cursor().execute(f'insert into `name` (`group`,`qq`,`name`) values({event.group_id},{int(event.get_user_id())},"{n}")')
+    hashmap.append([event.group_id,int(event.get_user_id()),n])
+    conn_name.commit()
+    await a.finish("ok")
+
+@t.handle()
+async def _(event: GroupMessageEvent):
+    if await check(int(event.get_user_id()),event.group_id):
+        conn_name.cursor().execute(f"DELETE FROM `name` WHERE qq = {int(event.get_user_id())} and `group` = {event.group_id};")
+        conn_name.commit()
+    for i in range(0,len(hashmap)):
+        if hashmap[i][0] == event.group_id and hashmap[i][1] == int(event.get_user_id()):
+            hashmap.pop(i)
+            break
+    await t.finish("退出完毕")
+
+async def check(qq,group):
+    f = conn_name.cursor().execute(f"SELECT * from `name` WHERE `qq`={qq} and `group` = {group};").fetchone()
+    if not f: return False
+    else: return True
