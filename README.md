@@ -23,6 +23,7 @@ nb plugin install nonebot-plugin-date-name
 
 - [x] 开启时间名字
 - [x] 关闭时间名字
+- [x] 将机器人自己的群名片设置为时间（需在配置中开启）
 
 >开启时间名字，支持**多人使用**，请在指令后面加上其他人的`QQ号`和`昵称`，示例`/开启时间名字 10001 你好`，自己的昵称第二次交互发给机器人就行了
 
@@ -38,4 +39,7 @@ nb plugin install nonebot-plugin-date-name
 ```bash
 COMMAND_START=["/"] # 配置命令起始字符
 SUPERUSER=[""]
+
+set_self_card=false # 是否将机器人自己在群里的群名片设置为当前时间
+self_card_name="" # 机器人自己群名片的时间前缀，留空则只显示时间
 ```
