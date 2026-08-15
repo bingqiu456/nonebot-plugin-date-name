@@ -37,5 +37,15 @@ async def _():
                     'group_id': group_id,
                     'user_id': user_id_2,
                     'card': now_time})
+        if config.set_self_card:
+            now_time = str(datetime.now().strftime(config.get_time_format))
+            if config.self_card_name:
+                now_time = f"{config.self_card_name} {now_time}"
+            for group in await bot.call_api("get_group_list"):
+                await bot.call_api(
+                    "set_group_card", **{
+                        'group_id': group["group_id"],
+                        'user_id': int(bot.self_id),
+                        'card': now_time})
     except ValueError:
         pass
